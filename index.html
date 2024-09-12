@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Gift</title>
+    <style>
+        body {
+            font-family: Lato;
+            text-align: center;
+        }
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tag {
+            margin: 10px;
+            padding: 4px 10px;
+            font-size: 1.5rem;
+            line-height: 1.75;
+            background-color: transparent; /* Прозрачный фон */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Тень для улучшения читаемости */
+        }
+        .popup {
+            position: fixed;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 6px;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+            z-index: -1; /* Hide it in the back of the page */
+        }
+        .popup.show {
+            visibility: visible;
+            opacity: 1;
+            z-index: 200;
+        }
+        #get-gift-btn,#close-popup {
+            background-color: transparent;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-top: 20px; /* Добавьте отступ сверху для кнопки */
+        }
+        #get-gift-btn:hover,#close-popup:hover {
+            background-color: rgba(233, 30, 99, 1);
+        }
+        #gift {
+            margin: 10px;
+            padding: 4px 10px;
+            font-size: 1.5rem;
+            line-height: 1.75;
+            background-color: transparent; /* Прозрачный фон */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Тень для улучшения читаемости */
+        }
+        .dice-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        .dice-animation.show {
+            display: block;
+        }
+        .dice-animation img {
+            width: 100px; /* Установите желаемый размер */
+            height: 100px; /* Установите желаемый размер */
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        #h-image{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #gift-image {
+            width: 150px;
+            height: 150px;
+
+        }
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+    </style>
+</head>
+<body>
+    <div class="h" id="h-image">
+        <img src="https://media.tenor.com/7EEiHjbv4BQAAAAi/pusheen-gift-wrapping.gif" alt="cat Animation" id="gift-image"/>
+    </div>
+    <div class="tag-cloud" id="tag-cloud"></div>
+    <button id="get-gift-btn">🐾 Get</button>
+    <div class="dice-animation" id="dice-animation">
+        <img src="https://media.tenor.com/qYYeQ6hkWmYAAAAi/popcorn-pop-corn.gif" alt="Dice Animation" />
+    </div>
+    <div class="popup" id="popup">
+        <h1>Your Gift:</h1>
+        <p id="gift"></p>
+        <button id="close-popup">Close</button>
+    </div>
+
+    <script>
+        // Функция для получения случайного элемента из массива
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+      // Функция для генерации случайного цвета с контрастностью к белому фону
+      function getRandomColor() {
+          let r, g, b;
+          do {
+              r = Math.floor(Math.random() * 256);
+              g = Math.floor(Math.random() * 256);
+              b = Math.floor(Math.random() * 256);
+          } while (isTooLight(r, g, b)); // Проверка на светлость
+          return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      // Функция для проверки, является ли цвет слишком светлым
+      function isTooLight(r, g, b) {
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          return brightness > 200; // Если яркость больше 200, цвет считается слишком светлым
+      }
+
+        // Массив подарков
+        const giftList = ['Your other one','Yandex station 2', 'Telegram premium', 'Waffle iron', 'Earrings'];
+
+        // Вывод тегов на страницу
+        const tagCloud = document.getElementById('tag-cloud');
+        const giftColors = []; // Массив для хранения цветов
+        giftList.forEach((gift, index) => {
+            const tag = document.createElement('div');
+            tag.classList.add('tag');
+            const color = getRandomColor();
+            tag.style.color = color; // Установка случайного цвета текста
+            giftColors.push(color); // Сохранение цвета
+            tag.textContent = gift;
+            tagCloud.appendChild(tag);
+        });
+
+      let clickCount = 0;
+
+      // Обработчик кнопки "Get"
+      document.getElementById('get-gift-btn').addEventListener('click', () => {
+          clickCount++;
+          if (clickCount > 1) {
+              const getGiftBtn = document.getElementById('get-gift-btn');
+              getGiftBtn.classList.add('shake');
+              setTimeout(() => {
+                  getGiftBtn.classList.remove('shake');
+              }, 500); // Удаляем класс через 0.5 секунды
+          }else{
+
+          // Остальной ваш код для обработки клика на кнопку "Get"
+          const diceAnimation = document.getElementById('dice-animation');
+          diceAnimation.classList.add('show');
+          const randomIndex = Math.floor(Math.random() * giftList.length);
+          const randomGift = giftList[randomIndex];
+          const popup = document.getElementById('popup');
+          const giftElement = document.getElementById('gift');
+          giftElement.textContent = randomGift;
+          giftElement.style.color = giftColors[randomIndex]; // Применение сохраненного цвета
+
+          // Остановка анимации и показ попапа через случайное время от 5 до 10 секунд
+          setTimeout(() => {
+              diceAnimation.classList.remove('show');
+              popup.classList.add('show');
+          }, Math.floor(Math.random() * 5000) + 5000); // 5-10 секунд
+          }
+      });
+
+      // Обработчик кнопки "Close" в попапе
+      document.getElementById('close-popup').addEventListener('click', () => {
+          const popup = document.getElementById('popup');
+          popup.classList.remove('show');
+          clickCount = 0; // Сбрасываем счетчик нажатий
+      });
+    </script>
+</body>
+</html>

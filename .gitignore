@@ -1,0 +1,9 @@
+.idea
+pip-log.txt
+pip-delete-this-directory.txt
+.python-version
+.env
+.venv
+*.pyc
+.mypy_cache/
+.__pycache__/
