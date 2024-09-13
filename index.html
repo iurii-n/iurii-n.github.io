@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Get Gift</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
     <style>
         body {
             font-family: Lato;
@@ -21,6 +22,18 @@
             line-height: 1.75;
             background-color: transparent; /* Прозрачный фон */
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Тень для улучшения читаемости */
+        }
+        .tag button {
+            margin-left: 5px;
+            padding: 2px 5px;
+            font-size: 1rem;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .tag button:hover {
+            background-color: rgba(233, 30, 99, 1);
         }
         .popup {
             position: fixed;
@@ -41,7 +54,7 @@
             opacity: 1;
             z-index: 200;
         }
-        #get-gift-btn,#close-popup {
+        #get-gift-btn,#close-popup,#add-tag-btn,#new-tag {
             background-color: transparent;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -50,16 +63,8 @@
             cursor: pointer;
             margin-top: 20px; /* Добавьте отступ сверху для кнопки */
         }
-        #get-gift-btn:hover,#close-popup:hover {
+        #get-gift-btn:hover,#close-popup:hover,#add-tag-btn:hover {
             background-color: rgba(233, 30, 99, 1);
-        }
-        #gift {
-            margin: 10px;
-            padding: 4px 10px;
-            font-size: 1.5rem;
-            line-height: 1.75;
-            background-color: transparent; /* Прозрачный фон */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Тень для улучшения читаемости */
         }
         .dice-animation {
             position: fixed;
@@ -89,15 +94,26 @@
             height: 150px;
 
         }
+        #gift {
+            margin: 10px;
+            padding: 4px 10px;
+            font-size: 1.5rem;
+            line-height: 1.75;
+            background-color: transparent; /* Прозрачный фон */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Тень для улучшения читаемости */
+        }
+        .hide {
+            display: none;
+        }
 
-@keyframes shake {
-    0% { transform: translateX(0); }
-    20% { transform: translateX(-5px); }
-    40% { transform: translateX(5px); }
-    60% { transform: translateX(-5px); }
-    80% { transform: translateX(5px); }
-    100% { transform: translateX(0); }
-}
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -115,31 +131,36 @@
         <button id="close-popup">Close</button>
     </div>
 
+    <form id="add-tag-form">
+        <input type="text" id="new-tag" placeholder="Enter a new gift">
+        <button id="add-tag-btn">🎁 Add</button>
+    </form>
+
     <script>
         // Функция для получения случайного элемента из массива
         function getRandomElement(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-      // Функция для генерации случайного цвета с контрастностью к белому фону
-      function getRandomColor() {
-          let r, g, b;
-          do {
-              r = Math.floor(Math.random() * 256);
-              g = Math.floor(Math.random() * 256);
-              b = Math.floor(Math.random() * 256);
-          } while (isTooLight(r, g, b)); // Проверка на светлость
-          return `rgb(${r}, ${g}, ${b})`;
-      }
+        // Функция для генерации случайного цвета с контрастностью к белому фону
+        function getRandomColor() {
+            let r, g, b;
+            do {
+                r = Math.floor(Math.random() * 256);
+                g = Math.floor(Math.random() * 256);
+                b = Math.floor(Math.random() * 256);
+            } while (isTooLight(r, g, b)); // Проверка на светлость
+            return `rgb(${r}, ${g}, ${b})`;
+        }
 
-      // Функция для проверки, является ли цвет слишком светлым
-      function isTooLight(r, g, b) {
-          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-          return brightness > 200; // Если яркость больше 200, цвет считается слишком светлым
-      }
+        // Функция для проверки, является ли цвет слишком светлым
+        function isTooLight(r, g, b) {
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 200; // Если яркость больше 200, цвет считается слишком светлым
+        }
 
         // Массив подарков
-        const giftList = ['Your other one','Yandex station 2', 'Telegram premium', 'Waffle iron', 'Earrings'];
+        let giftList = ['Your other one','Yandex station 2', 'Telegram premium', 'Waffle iron', 'Earrings'];
 
         // Вывод тегов на страницу
         const tagCloud = document.getElementById('tag-cloud');
@@ -150,48 +171,186 @@
             const color = getRandomColor();
             tag.style.color = color; // Установка случайного цвета текста
             giftColors.push(color); // Сохранение цвета
-            tag.textContent = gift;
+
+            const span = document.createElement('span');
+            span.textContent = gift;
+            tag.appendChild(span);
+
+            // Добавление кнопок редактирования и удаления
+            const editBtn = document.createElement('button');
+            editBtn.innerHTML = '<i class="fas fa-edit"></i>'; // Иконка для редактирования
+            editBtn.onclick = () => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = span.textContent;
+                tag.replaceChild(input, span);
+                input.focus();
+                input.onblur = () => {
+                    span.textContent = input.value;
+                    tag.replaceChild(span, input);
+                    updateGiftList(span.textContent, gift);
+                };
+                input.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        span.textContent = input.value;
+                        tag.replaceChild(span, input);
+                        updateGiftList(span.textContent, gift);
+                    }
+                };
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Иконка для удаления
+            deleteBtn.onclick = () => {
+                removeGiftFromList(tag);
+                tagCloud.removeChild(tag);
+
+            };
+
+            tag.appendChild(editBtn);
+            tag.appendChild(deleteBtn);
+
             tagCloud.appendChild(tag);
         });
 
-      let clickCount = 0;
+        // Функция для обновления giftList при редактировании тега
+        function updateGiftList(newText, oldText, ) {
+            const index = giftList.indexOf(oldText);
+            if (index !== -1) {
+                giftList[index] = newText;
+            }
+        }
 
-      // Обработчик кнопки "Get"
-      document.getElementById('get-gift-btn').addEventListener('click', () => {
-          clickCount++;
-          if (clickCount > 1) {
-              const getGiftBtn = document.getElementById('get-gift-btn');
-              getGiftBtn.classList.add('shake');
-              setTimeout(() => {
-                  getGiftBtn.classList.remove('shake');
-              }, 500); // Удаляем класс через 0.5 секунды
-          }else{
+        // Функция для удаления тега из giftList
+        function removeGiftFromList(tag) {
+            const span = tag.querySelector('span');
+            const gift = span.textContent;
+            const index = giftList.indexOf(gift);
+            if (index !== -1) {
+                giftList.splice(index, 1);
+                giftColors.splice(index, 1); // Удаление цвета из массива
+            }
+        }
 
-          // Остальной ваш код для обработки клика на кнопку "Get"
-          const diceAnimation = document.getElementById('dice-animation');
-          diceAnimation.classList.add('show');
-          const randomIndex = Math.floor(Math.random() * giftList.length);
-          const randomGift = giftList[randomIndex];
-          const popup = document.getElementById('popup');
-          const giftElement = document.getElementById('gift');
-          giftElement.textContent = randomGift;
-          giftElement.style.color = giftColors[randomIndex]; // Применение сохраненного цвета
+        // Функция для добавления нового тега в giftList
+        function addGiftToList(newText) {
+            giftList.push(newText);
+        }
 
-          // Остановка анимации и показ попапа через случайное время от 5 до 10 секунд
-          setTimeout(() => {
-              diceAnimation.classList.remove('show');
-              popup.classList.add('show');
-          }, Math.floor(Math.random() * 5000) + 5000); // 5-10 секунд
-          }
-      });
+        let clickCount = 0;
 
-      // Обработчик кнопки "Close" в попапе
-      document.getElementById('close-popup').addEventListener('click', () => {
-          const popup = document.getElementById('popup');
-          popup.classList.remove('show');
-          clickCount = 0; // Сбрасываем счетчик нажатий
-      });
+        // Обработчик кнопки "Get"
+        document.getElementById('get-gift-btn').addEventListener('click', () => {
+            clickCount++;
+            if (clickCount > 1) {
+                const getGiftBtn = document.getElementById('get-gift-btn');
+                getGiftBtn.classList.add('shake');
+                setTimeout(() => {
+                    getGiftBtn.classList.remove('shake');
+                }, 500); // Удаляем класс через 0.5 секунды
+            } else {
+                // Остальной ваш код для обработки клика на кнопку "Get"
+                const diceAnimation = document.getElementById('dice-animation');
+                diceAnimation.classList.add('show');
+                const randomIndex = Math.floor(Math.random() * giftList.length);
+                const randomGift = giftList[randomIndex];
+                const popup = document.getElementById('popup');
+                const giftElement = document.getElementById('gift');
+                giftElement.textContent = randomGift;
+                giftElement.style.color = giftColors[randomIndex]; // Применение сохраненного цвета
 
+                // Скрыть кнопки и поле ввода
+                document.querySelectorAll('.tag button').forEach(button => button.classList.add('hide'));
+                document.getElementById('add-tag-btn').classList.add('hide');
+                document.getElementById('new-tag').classList.add('hide');
+
+                // Остановка анимации и показ попапа через случайное время от 5 до 10 секунд
+                setTimeout(() => {
+                    diceAnimation.classList.remove('show');
+                    popup.classList.add('show');
+                }, Math.floor(Math.random() * 5000) + 5000); // 5-10 секунд
+            }
+        });
+
+        // Обработчик кнопки "Close" в попапе
+        document.getElementById('close-popup').addEventListener('click', () => {
+            const popup = document.getElementById('popup');
+            popup.classList.remove('show');
+            clickCount = 0; // Сбрасываем счетчик нажатий
+
+            // Показать кнопки и поле ввода
+            document.querySelectorAll('.tag button').forEach(button => button.classList.remove('hide'));
+            document.getElementById('add-tag-btn').classList.remove('hide');
+            document.getElementById('new-tag').classList.remove('hide');
+        });
+        // Добавление обработчика для закрытия попапа по нажатию на Esc
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                const popup = document.getElementById('popup');
+                if (popup.classList.contains('show')) {
+                    popup.classList.remove('show');
+                    clickCount = 0; // Сбрасываем счетчик нажатий
+
+                    // Показать кнопки и поле ввода
+                    document.querySelectorAll('.tag button').forEach(button => button.classList.remove('hide'));
+                    document.getElementById('add-tag-btn').classList.remove('hide');
+                    document.getElementById('new-tag').classList.remove('hide');
+                }
+            }
+        });
+
+        // Обработчик добавления нового тега
+        document.getElementById('add-tag-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const newTagText = document.getElementById('new-tag').value;
+            if (newTagText) {
+                addGiftToList(newTagText);
+                const tag = document.createElement('div');
+                tag.classList.add('tag');
+                const color = getRandomColor();
+                tag.style.color = color; // Установка случайного цвета текста
+                giftColors.push(color);
+                const span = document.createElement('span');
+                span.textContent = newTagText;
+                tag.appendChild(span);
+
+                // Добавление кнопок редактирования и удаления
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>'; // Иконка для редактирования
+                editBtn.onclick = () => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = span.textContent;
+                    tag.replaceChild(input, span);
+                    input.focus();
+                    input.onblur = () => {
+                        span.textContent = input.value;
+                        tag.replaceChild(span, input);
+                        updateGiftList(span.textContent, newTagText);
+                    };
+                    input.onkeydown = (e) => {
+                        if (e.key === 'Enter') {
+                            span.textContent = input.value;
+                            tag.replaceChild(span, input);
+                            updateGiftList(span.textContent, newTagText);
+                        }
+                    };
+                };
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Иконка для удаления
+                deleteBtn.onclick = () => {
+                    tagCloud.removeChild(tag);
+                    removeGiftFromList(tag);
+                };
+
+                tag.appendChild(editBtn);
+                tag.appendChild(deleteBtn);
+
+                tagCloud.appendChild(tag);
+                document.getElementById('new-tag').value = '';
+            }
+        });
     </script>
 </body>
 </html>
